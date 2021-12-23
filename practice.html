@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/5.0.0-alpha.0/redux.js" integrity="sha512-rrwKW9q7MLeNxl6R7SHb2DjciTUBoCFCdbTwMQWdfJ1uqT22lKR5YWdbKoRuBLFGk3XoEZ7jRwWjiCGLopwW1g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    </head>
+
+    <body>
+        <style>
+        body { font-size:1.4em; padding-left:50px; }
+        </style>
+
+        <div id='header'></div>
+        <div id='nav'></div>
+        <div id='control'></div>
+        <div id='article'></div>
+
+        <script>
+            /* start of redux */
+            function reducer(state, action) {
+                if ( state === undefined ) {
+                    return {
+                        selected_id: 1,
+                        contents: [
+                            {id:1, title:'HTML', desc:'HTML is ...'},
+                            {id:2, title:'CSS', desc:'CSS is ...'}
+                        ]
+                    };
+                } else if ( action.type === 'SELECT' ) {
+                    return Object.assign({}, state, {selected_id:action.id});
+                }
+            }
+
+            let store = Redux.createStore(reducer);
+            /* end of redux */
+
+            function header() {
+                document.querySelector('#header').innerHTML = `
+                    <header>
+                        <h1>WEB</h1>
+                        Hello, WEB!
+                    </header>
+                `;
+            }
+
+            function nav() {
+                let state = store.getState();
+                let i = 0;
+                let liTags = '';
+
+                for( content of state.contents ) {
+                    liTags += `
+                        <li><a href='${content.id}' onclick="
+                            event.preventDefault();
+                            store.dispatch( {type:'SELECT', id:${content.id}} );
+                        ">${content.title}</a></li>
+                    `;
+                }
+
+                document.querySelector('#nav').innerHTML = `
+                    <nav>
+                        <ol>
+                            ${liTags}
+                        </ol>
+                    </nav>
+                `;
+            }
+
+            function control() {
+                document.querySelector('#control').innerHTML = `
+                    <ul>
+                        <li><button>create</button></li>
+                        <li><button>delete</button></li>
+                    </ul>
+                `;
+            }
+
+            function article() {
+                let state = store.getState();
+
+                document.querySelector('#article').innerHTML = `
+                    <article>
+                        <h2>${state.contents[ state.selected_id-1 ].title}</h2>
+                        ${state.contents[ state.selected_id-1 ].desc}
+                    </article>
+                `;
+            }
+
+            header();
+            nav();
+            control();
+            article();
+
+            store.subscribe( article );
+        </script>
+    </body>
+</html>
